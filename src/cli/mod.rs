@@ -4,7 +4,7 @@ use clap::{Parser, Subcommand};
 #[command(name = "hspass")]
 #[command(author = "Hacski")]
 #[command(version = "0.1.0")]
-#[command(about = "Zero-Knowledge CLI Password Manager, Passkey Emulator & Offline Blockchain Backup Engine", long_about = None)]
+#[command(about = "Zero Knowledge CLI Password Manager, Passkey Emulator and Offline Blockchain Backup Engine", long_about = None)]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
@@ -21,7 +21,7 @@ pub enum Commands {
 
     /// Generate and securely store a new credential password
     Generate {
-        /// Service/Domain name (e.g. github.com)
+        /// Service or domain name
         service: String,
         /// Username or email address
         #[arg(short, long)]
@@ -29,7 +29,7 @@ pub enum Commands {
         /// Password length
         #[arg(short, long, default_value_t = 24)]
         length: usize,
-        /// Avoid ambiguous characters (0, O, I, l)
+        /// Avoid ambiguous characters
         #[arg(long)]
         no_ambiguous: bool,
     },
@@ -50,7 +50,7 @@ pub enum Commands {
         /// New username
         #[arg(short, long)]
         username: Option<String>,
-        /// New password (if omitted, interactive prompt will ask)
+        /// New password
         #[arg(short, long)]
         password: Option<String>,
     },
@@ -61,16 +61,19 @@ pub enum Commands {
         service: String,
     },
 
-    /// Display live TOTP / HOTP single-use 6-digit codes with visual progress bar
+    /// Display live TOTP single use 6 digit codes continuously until expired
     Otp {
-        /// Service name or otpauth:// URI
+        /// Service name or otpauth URI
         service: String,
         /// Add a new secret URI for this service
         #[arg(short, long)]
         add_secret: Option<String>,
+        /// Exit after single 30s expiration cycle
+        #[arg(long)]
+        watch_once: bool,
     },
 
-    /// FIDO2 / Passkey software emulator operations
+    /// FIDO2 Passkey software emulator operations
     Passkey {
         #[command(subcommand)]
         action: PasskeyCommands,
@@ -79,21 +82,21 @@ pub enum Commands {
     /// Scan local vault for weak, duplicate, or short passwords
     Audit,
 
-    /// Compile vault state into signed offline Merkle payload & display Air-Gapped QR code
+    /// Compile vault state into signed offline Merkle payload and display Air Gapped QR code
     Blockchain {
         #[command(subcommand)]
         action: BlockchainCommands,
     },
 
-    /// Launch full interactive Terminal UI mode (TUI)
+    /// Launch full interactive Terminal UI mode
     Tui,
 }
 
 #[derive(Subcommand, Debug)]
 pub enum PasskeyCommands {
-    /// Register a new FIDO2 passkey for a target domain/RP
+    /// Register a new FIDO2 passkey for a target domain
     Register {
-        /// Relying party domain (e.g. github.com)
+        /// Relying party domain
         domain: String,
         /// User login name
         #[arg(short, long)]
@@ -106,20 +109,20 @@ pub enum PasskeyCommands {
         /// User login name
         #[arg(short, long)]
         username: String,
-        /// Hex/Base64 server challenge string
+        /// Hex or Base64 server challenge string
         challenge: String,
     },
 }
 
 #[derive(Subcommand, Debug)]
 pub enum BlockchainCommands {
-    /// Export signed Merkle state & encrypted anchor transaction payload
+    /// Export signed Merkle state and encrypted anchor transaction payload
     Export {
         /// Display payload as terminal ASCII QR Code
         #[arg(long)]
         qr: bool,
     },
-    /// Verify an exported blockchain payload's Merkle root and signature
+    /// Verify an exported blockchain payload Merkle root and signature
     Verify {
         /// Path to JSON payload file
         file: String,

@@ -7,6 +7,7 @@ use hspass::blockchain::BlockchainBackupEngine;
 use hspass::cli::{BlockchainCommands, Cli, Commands, PasskeyCommands};
 use hspass::crypto::EncryptionAlgorithm;
 use hspass::generator::{generate_password, PasswordGeneratorOptions};
+use hspass::otp::runner::ContinuousOtpRunner;
 use hspass::otp::OtpEngine;
 use hspass::passkey::PasskeyEngine;
 use hspass::tui::run_tui;
@@ -145,7 +146,11 @@ fn main() -> Result<()> {
             }
         }
 
-        Commands::Otp { service, add_secret } => {
+        Commands::Otp {
+            service,
+            add_secret,
+            watch_once,
+        } => {
             let pass = prompt_passphrase("Enter Master Passphrase: ")?;
             let mut vault = manager.read_vault(pass.as_bytes())?;
 
@@ -157,12 +162,7 @@ fn main() -> Result<()> {
 
             if let Some(secret_str) = vault.totp_entries.get(&service) {
                 let secret_bytes = OtpEngine::parse_secret(secret_str)?;
-                let (code, remaining) = OtpEngine::current_totp(&secret_bytes)?;
-                let progress = OtpEngine::format_progress_bar(remaining);
-
-                println!("\nLive TOTP for [{}]:", service);
-                println!("   Code:     {}", code);
-                println!("   Time:     {}", progress);
+                ContinuousOtpRunner::run_continuous_totp(&service, &secret_bytes, watch_once)?;
             } else {
                 println!("No TOTP secret registered for '{}'. Use --add-secret to add one.", service);
             }

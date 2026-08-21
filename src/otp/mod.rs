@@ -1,3 +1,5 @@
+pub mod runner;
+
 use anyhow::{anyhow, Result};
 use std::time::{SystemTime, UNIX_EPOCH};
 use totp_lite::{totp_custom, Sha1};
