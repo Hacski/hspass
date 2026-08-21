@@ -4,3 +4,4 @@ pub mod generator;
 pub mod audit;
 pub mod passkey;
 pub mod otp;
+pub mod blockchain;
