@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>hspass Documentation</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <h1>hspass Documentation</h1>
+    <p>Zero Knowledge CLI Password Manager and Security Tool</p>
+  </header>
+
+  <p>
+    [ <a href="#overview">Overview</a> ]
+    [ <a href="#quickstart">Quickstart</a> ]
+    [ <a href="#commands">Commands</a> ]
+    [ <a href="#architecture">Architecture</a> ]
+    [ <a href="https://github.com/Hacski/hspass">GitHub Repository</a> ]
+  </p>
+
+  <hr>
+
+  <h2 id="overview">Overview</h2>
+  <p>hspass is a zero knowledge command line security utility written in Rust. It operates entirely on your local machine with zero external cloud dependencies or remote server tracking.</p>
+
+  <h3>Key Components</h3>
+  <ul>
+    <li>Zero Knowledge Cryptography using Argon2id key derivation and AES 256 GCM encryption.</li>
+    <li>FIDO2 and CTAP2 Passkey software emulation using ECDSA secp256r1 keypairs.</li>
+    <li>Continuous live TOTP authenticator with active terminal progress counters.</li>
+    <li>Offline blockchain state anchoring computing SHA3 256 Merkle tree roots.</li>
+  </ul>
+
+  <h2 id="quickstart">Quickstart</h2>
+  <p>Build the binary from source using Rust cargo and initialize a new vault:</p>
+  <pre>git clone https://github.com/Hacski/hspass.git
+cd hspass
+cargo build --release
+./target/release/hspass init</pre>
+
+  <h2 id="commands">Command Reference</h2>
+
+  <h3>1. Password Management</h3>
+  <pre># Generate password
+hspass generate github.com --username alice --length 24
+
+# Retrieve stored entry
+hspass get github.com
+
+# List all vault services
+hspass list</pre>
+
+  <h3>2. Live TOTP Authenticator</h3>
+  <pre># Save secret URI and run live continuous ticker
+hspass otp github.com --add-secret "otpauth://totp/GitHub:alice?secret=JBSWY3DPEHPK3PXP"
+
+# Run ticker continuously
+hspass otp github.com</pre>
+
+  <h3>3. FIDO2 Passkeys</h3>
+  <pre># Register passkey
+hspass passkey register github.com --username alice
+
+# Sign challenge
+hspass passkey sign github.com --username alice 416c6963654368616c6c656e6765</pre>
+
+  <h3>4. Security Audit and Blockchain Backup</h3>
+  <pre># Run health scan
+hspass audit
+
+# Export signed payload and QR code
+hspass blockchain export --qr</pre>
+
+  <h2 id="architecture">Architecture</h2>
+  <pre>+---------------------------------------------------------------+
+|                        hspass CLI UI                          |
+|                 (Clap / Ratatui TUI Dashboard)                |
++---------------------------------------------------------------+
+                                |
++---------------------------------------------------------------+
+|                    Core Engine Coordinator                    |
++-------+---------------+---------------+---------------+-------+
+        |               |               |               |
+        v               v               v               v
++---------------+ +-----------+ +---------------+ +-----------+
+| Vault & Crypto| | Passkeys  | | TOTP/HOTP     | | Blockchain|
+| (Argon2id +   | | (CTAP2 /  | | (HMAC SHA1 /  | | Anchoring |
+|  AES 256 GCM) | | WebAuthn) | |  SHA256 Engine| | & Merkle) |
++---------------+ +-----------+ +---------------+ +-----------+
+        |               |               |               |
+        +---------------+---------------+---------------+
+                        |
+                        v
++---------------------------------------------------------------+
+|               Platform Abstraction Storage Layer              |
+|                     (~/.hspass/vault.enc)                     |
++---------------------------------------------------------------+</pre>
+
+  <footer>
+    <p>hspass documentation page. Plain text HTML format.</p>
+  </footer>
+
+</body>
+</html>
