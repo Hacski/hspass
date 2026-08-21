@@ -2,3 +2,5 @@ pub mod crypto;
 pub mod vault;
 pub mod generator;
 pub mod audit;
+pub mod passkey;
+pub mod otp;
