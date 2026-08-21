@@ -5,3 +5,5 @@ pub mod audit;
 pub mod passkey;
 pub mod otp;
 pub mod blockchain;
+pub mod cli;
+pub mod tui;
