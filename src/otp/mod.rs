@@ -6,7 +6,7 @@ use url::Url;
 pub struct OtpEngine;
 
 impl OtpEngine {
-    /// Generate a 6-digit TOTP code given a raw secret bytes and timestamp
+    /// Generate a 6 digit TOTP code given raw secret bytes and timestamp
     pub fn generate_totp(secret: &[u8], seconds: u64) -> String {
         let step = 30;
         let digits = 6;
@@ -14,7 +14,7 @@ impl OtpEngine {
         format!("{:06}", result)
     }
 
-    /// Helper to get current TOTP code and remaining seconds in 30-second window
+    /// Helper to get current TOTP code and remaining seconds in 30 second window
     pub fn current_totp(secret: &[u8]) -> Result<(String, u64)> {
         let now = SystemTime::now()
             .duration_since(UNIX_EPOCH)
@@ -26,7 +26,7 @@ impl OtpEngine {
         Ok((code, remaining))
     }
 
-    /// Parse secret bytes from a base32 encoded string or otpauth:// URI
+    /// Parse secret bytes from a base32 encoded string or otpauth URI
     pub fn parse_secret(secret_str: &str) -> Result<Vec<u8>> {
         let clean_secret = if secret_str.starts_with("otpauth://") {
             let url = Url::parse(secret_str)?;
@@ -50,13 +50,13 @@ impl OtpEngine {
         Ok(bytes)
     }
 
-    /// Format progress bar for terminal output [████████░░░░] 20s
+    /// Format progress bar for terminal output
     pub fn format_progress_bar(remaining_secs: u64) -> String {
         let total_blocks: usize = 15;
         let filled_blocks = ((remaining_secs as f64 / 30.0) * total_blocks as f64).round() as usize;
         let empty_blocks = total_blocks.saturating_sub(filled_blocks);
 
-        let bar: String = "█".repeat(filled_blocks) + &"░".repeat(empty_blocks);
+        let bar: String = "#".repeat(filled_blocks) + &".".repeat(empty_blocks);
         format!("[{}] {:2}s", bar, remaining_secs)
     }
 }
@@ -95,7 +95,7 @@ mod tests {
         assert!(remaining <= 30);
 
         let bar = OtpEngine::format_progress_bar(15);
-        assert!(bar.contains("█"));
-        assert!(bar.contains("░"));
+        assert!(bar.contains('#'));
+        assert!(bar.contains('.'));
     }
 }

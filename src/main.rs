@@ -42,7 +42,7 @@ fn main() -> Result<()> {
                 .map_err(|e| anyhow!("Passphrase creation failed: {}", e))?;
 
             manager.initialize(pass.as_bytes(), algo)?;
-            println!("🔒 Successfully initialized zero-knowledge vault at {:?}", manager.vault_path);
+            println!("Successfully initialized zero knowledge vault at {:?}", manager.vault_path);
         }
 
         Commands::Generate {
@@ -59,7 +59,7 @@ fn main() -> Result<()> {
             let password = generate_password(&opts);
             let user = username.unwrap_or_else(|| "default".to_string());
 
-            println!("🔑 Generated Password for {}:", service);
+            println!("Generated Password for {}:", service);
             println!("   {}", password);
 
             if manager.exists() {
@@ -78,7 +78,7 @@ fn main() -> Result<()> {
                         };
                         vault.credentials.insert(service.clone(), cred);
                         manager.save_vault(pass.as_bytes(), &vault)?;
-                        println!("✔ Saved credential to encrypted vault.");
+                        println!("Saved credential to encrypted vault.");
                     }
                 }
             }
@@ -89,14 +89,14 @@ fn main() -> Result<()> {
             let vault = manager.read_vault(pass.as_bytes())?;
 
             if let Some(cred) = vault.credentials.get(&service) {
-                println!("\n🔑 Credential Details for [{}]:", service);
+                println!("\nCredential Details for [{}]:", service);
                 println!("   Username: {}", cred.username);
                 println!("   Password: {}", cred.password);
                 if let Some(url) = &cred.url {
                     println!("   URL:      {}", url);
                 }
             } else {
-                println!("❌ Service '{}' not found in vault.", service);
+                println!("Service '{}' not found in vault.", service);
             }
         }
 
@@ -104,9 +104,9 @@ fn main() -> Result<()> {
             let pass = prompt_passphrase("Enter Master Passphrase: ")?;
             let vault = manager.read_vault(pass.as_bytes())?;
 
-            println!("\n📋 Vault Credentials ({} entries):", vault.credentials.len());
+            println!("\nVault Credentials ({} entries):", vault.credentials.len());
             for (service, cred) in &vault.credentials {
-                println!("   • {} ({})", service, cred.username);
+                println!("   * {} ({})", service, cred.username);
             }
         }
 
@@ -127,9 +127,9 @@ fn main() -> Result<()> {
                 }
                 cred.updated_at = chrono::Utc::now();
                 manager.save_vault(pass.as_bytes(), &vault)?;
-                println!("✔ Updated credential for '{}'.", service);
+                println!("Updated credential for '{}'.", service);
             } else {
-                println!("❌ Service '{}' not found in vault.", service);
+                println!("Service '{}' not found in vault.", service);
             }
         }
 
@@ -139,9 +139,9 @@ fn main() -> Result<()> {
 
             if vault.credentials.remove(&service).is_some() {
                 manager.save_vault(pass.as_bytes(), &vault)?;
-                println!("✔ Removed credential for '{}'.", service);
+                println!("Removed credential for '{}'.", service);
             } else {
-                println!("❌ Service '{}' not found in vault.", service);
+                println!("Service '{}' not found in vault.", service);
             }
         }
 
@@ -152,7 +152,7 @@ fn main() -> Result<()> {
             if let Some(sec_str) = add_secret {
                 vault.totp_entries.insert(service.clone(), sec_str.clone());
                 manager.save_vault(pass.as_bytes(), &vault)?;
-                println!("✔ Saved TOTP secret for '{}'.", service);
+                println!("Saved TOTP secret for '{}'.", service);
             }
 
             if let Some(secret_str) = vault.totp_entries.get(&service) {
@@ -160,11 +160,11 @@ fn main() -> Result<()> {
                 let (code, remaining) = OtpEngine::current_totp(&secret_bytes)?;
                 let progress = OtpEngine::format_progress_bar(remaining);
 
-                println!("\n⏰ Live TOTP for [{}]:", service);
+                println!("\nLive TOTP for [{}]:", service);
                 println!("   Code:     {}", code);
                 println!("   Time:     {}", progress);
             } else {
-                println!("❌ No TOTP secret registered for '{}'. Use --add-secret to add one.", service);
+                println!("No TOTP secret registered for '{}'. Use --add-secret to add one.", service);
             }
         }
 
@@ -178,7 +178,7 @@ fn main() -> Result<()> {
                 vault.passkeys.insert(record.id.clone(), serialized);
 
                 manager.save_vault(pass.as_bytes(), &vault)?;
-                println!("🔑 Successfully registered FIDO2 Passkey for domain: {}", domain);
+                println!("Successfully registered FIDO2 Passkey for domain: {}", domain);
                 println!("   Key ID: {}", record.id);
             }
             PasskeyCommands::Sign { domain, username, challenge } => {
@@ -194,10 +194,10 @@ fn main() -> Result<()> {
                     vault.passkeys.insert(key_id, updated_bytes);
                     manager.save_vault(pass.as_bytes(), &vault)?;
 
-                    println!("✔ Signed assertion challenge for {}:", domain);
+                    println!("Signed assertion challenge for {}:", domain);
                     println!("   Signature: {}", hex::encode(sig));
                 } else {
-                    println!("❌ Passkey for '{}:{}' not found.", domain, username);
+                    println!("Passkey for '{}:{}' not found.", domain, username);
                 }
             }
         },
@@ -207,19 +207,19 @@ fn main() -> Result<()> {
             let vault = manager.read_vault(pass.as_bytes())?;
             let report = run_vault_audit(&vault);
 
-            println!("\n🔍 Vault Security Health Scan:");
+            println!("\nVault Security Health Scan:");
             println!("   Total Credentials:   {}", report.total_credentials);
             println!("   Weak Passwords:      {}", report.weak_passwords);
             println!("   Short Passwords:     {}", report.short_passwords);
             println!("   Reused Passwords:    {}", report.duplicate_passwords);
 
             if !report.issues.is_empty() {
-                println!("\n⚠️ Security Issues Detected:");
+                println!("\nSecurity Issues Detected:");
                 for issue in report.issues {
-                    println!("   • [{:?}] {} ({}): {}", issue.severity, issue.service, issue.issue_type, issue.description);
+                    println!("   * [{:?}] {} ({}): {}", issue.severity, issue.service, issue.issue_type, issue.description);
                 }
             } else {
-                println!("\n✅ Excellent! No security risks found in vault.");
+                println!("\nExcellent! No security risks found in vault.");
             }
         }
 
@@ -230,11 +230,11 @@ fn main() -> Result<()> {
                 let payload = BlockchainBackupEngine::generate_signed_blockchain_payload(&manager.vault_path, &vault)?;
                 let json = serde_json::to_string_pretty(&payload)?;
 
-                println!("\n⛓️ Signed Blockchain Anchor Payload:");
+                println!("\nSigned Blockchain Anchor Payload:");
                 println!("{}", json);
 
                 if qr {
-                    println!("\n📱 Air-Gapped QR Export Code:");
+                    println!("\nAir Gapped QR Export Code:");
                     let qr_art = BlockchainBackupEngine::generate_qr_code(&json)?;
                     println!("{}", qr_art);
                 }
@@ -242,7 +242,7 @@ fn main() -> Result<()> {
             BlockchainCommands::Verify { file } => {
                 let content = std::fs::read_to_string(file)?;
                 let payload: hspass::blockchain::BlockchainBackupPayload = serde_json::from_str(&content)?;
-                println!("✔ Validated Blockchain Backup Payload Structure:");
+                println!("Validated Blockchain Backup Payload Structure:");
                 println!("   Merkle Root: {}", payload.vault_merkle_root);
                 println!("   Signer:      {}", payload.signer_address);
                 println!("   Entries:     {}", payload.entry_count);
